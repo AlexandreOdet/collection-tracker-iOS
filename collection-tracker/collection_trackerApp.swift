@@ -1,32 +1,25 @@
-//
-//  collection_trackerApp.swift
-//  collection-tracker
-//
-//  Created by Alexandre Odet on 18/10/2026.
-//
-
 import SwiftUI
 import SwiftData
 
 @main
 struct collection_trackerApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    private let container: ModelContainer
+    @State private var syncService: SyncService
 
+    init() {
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            container = try ModelContainer(for: CollectionItem.self)
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+        _syncService = State(initialValue: SyncService(context: container.mainContext))
+    }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environment(syncService)
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(container)
     }
 }
